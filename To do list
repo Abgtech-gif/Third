@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Smart To-Do List</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px #0005;
+}
+
+h1 {
+    text-align: center;
+    color: #243b55;
+}
+
+.subtitle {
+    text-align: center;
+    color: gray;
+}
+
+.input-area {
+    display: flex;
+    gap: 8px;
+    margin: 25px 0;
+}
+
+input {
+    flex: 1;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+}
+
+button {
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #243b55;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4169a1;
+}
+
+.filters {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filters button {
+    background: #eee;
+    color: #333;
+}
+
+.filters button.active {
+    background: #243b55;
+    color: white;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #f3f5f8;
+    padding: 13px;
+    margin-bottom: 10px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+li span {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+li.completed span {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.delete {
+    background: #e74c3c;
+    padding: 8px 10px;
+}
+
+#counter {
+    text-align: center;
+    color: gray;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>My Daily Tasks 📝</h1>
+
+    <p class="subtitle">
+        Organize your day, one task at a time.
+    </p>
+
+    <div class="input-area">
+        <input type="text" id="taskInput"
+        placeholder="Enter a new task...">
+
+        <button onclick="addTask()">Add</button>
+    </div>
+
+    <div class="filters">
+        <button class="active" onclick="filterTasks('all', this)">All</button>
+        <button onclick="filterTasks('pending', this)">Pending</button>
+        <button onclick="filterTasks('completed', this)">Completed</button>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <p id="counter">0 tasks remaining</p>
+
+</div>
+
+<script>
+let tasks = [];
+let currentFilter = "all";
+
+// Add a new task
+function addTask() {
+    let input = document.getElementById("taskInput");
+    let taskName = input.value.trim();
+
+    if (taskName === "") {
+        alert("Please enter a task!");
+        return;
+    }
+
+    tasks.push({
+        name: taskName,
+        completed: false
+    });
+
+    input.value = "";
+    displayTasks();
+}
+
+// Display tasks
+function displayTasks() {
+    let taskList = document.getElementById("taskList");
+    taskList.innerHTML = "";
+
+    tasks.forEach(function(task, index) {
+
+        if (currentFilter === "pending" && task.completed) return;
+        if (currentFilter === "completed" && !task.completed) return;
+
+        let li = document.createElement("li");
+
+        if (task.completed) {
+            li.classList.add("completed");
+        }
+
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+
+        checkbox.onchange = function() {
+            tasks[index].completed = checkbox.checked;
+            displayTasks();
+        };
+
+        let span = document.createElement("span");
+        span.textContent = task.name;
+
+        let deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "delete";
+
+        deleteBtn.onclick = function() {
+            tasks.splice(index, 1);
+            displayTasks();
+        };
+
+        li.append(checkbox, span, deleteBtn);
+        taskList.appendChild(li);
+    });
+
+    let remaining = tasks.filter(function(task) {
+        return !task.completed;
+    }).length;
+
+    document.getElementById("counter").textContent =
+        remaining + " tasks remaining";
+}
+
+// Filter tasks
+function filterTasks(filter, button) {
+    currentFilter = filter;
+
+    document.querySelectorAll(".filters button").forEach(function(btn) {
+        btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    displayTasks();
+}
+
+// Allow Enter key to add tasks
+document.getElementById("taskInput").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        addTask();
+    }
+});
+</script>
+
+</body>
+</html>
